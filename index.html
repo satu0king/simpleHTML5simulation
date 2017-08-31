@@ -1,0 +1,117 @@
+<html>
+<body onload="setup()">
+    <canvas id="simulationArea" style="position: absolute; left: 0; top: 0; z-index: 0; width:100%;height:100%"></canvas>
+</body>
+
+</html>
+<script>
+
+
+    function setup(){
+        ctx=document.getElementById("simulationArea").getContext("2d");
+        height=window.innerHeight;
+        width=window.innerWidth;
+        document.getElementById("simulationArea").width=width;
+        document.getElementById("simulationArea").height=height;
+    }
+    function clearCanvas(){
+        ctx.clearRect(0,0,width,height);
+    }
+    //Distance is a function which calculates Distance between 2 points
+    function distance(x1,y1,x2,y2){
+        return Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
+    }
+    //Angle is a function which calculates the angle between 2 points
+    function angle(x1 ,y1,x2 ,y2){
+        var ang;
+        //In case the 2 points are perpendicular
+        if(x1-x2==0){
+            ang=-1.57;
+        }
+        else{
+            // ( tan inverse of the Slope of the line joining the 2 points )
+            ang = Math.atan((y1 - y2) / (x1 - x2));
+        }
+
+        //Quadrants
+        if (ang < 0 && y1> y2){
+            ang += 3.14;
+        }
+        else if (ang > 0 && x1 < x2){
+            ang += 3.14;
+        }
+        return ang;
+
+    }
+
+    //declaration of variables
+    var x1=200,y1=200,x2=200,y2=200, s=100;
+    var vx2=0,vy2=0;
+    mouseX=0;
+    mouseY=0;
+
+    window.addEventListener('mousemove', function(e) {
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+
+    });
+    setInterval(iterate,50);
+    function iterate(){
+        //Getting the coordinates of the mouse
+
+        var x1=mouseX;
+        var y1=mouseY;
+
+        //Finding distance and angle between 2 points
+
+        var d1=distance(x1,y1,x2,y2);
+        var ang1=angle(x1,y1,x2,y2);
+
+        //If the rope is stretched
+
+        if(d1-s>0){
+            //Resolving tension into vectors
+            vy2+=(d1-s)*Math.sin(ang1)*.007;
+            vx2+=(d1-s)*Math.cos(ang1)*.007;
+        }
+
+        //Gravitational force on y coordinate
+
+        vy2+=.53;
+
+        //Now moving the body
+
+        y2+=vy2;
+        x2+=vx2;
+
+        //Friction reduces velocity by 1%
+
+        vy2*=.97;
+        vx2*=.97;
+
+        //Drawing begins here
+        clearCanvas();
+
+        //draws 2 circles on the screen
+        ctx.beginPath();
+        ctx.arc(x1,y1,25,0,2*Math.PI);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.arc(x2,y2,25,0,2*Math.PI);
+        ctx.stroke();
+
+        //draws a line between them
+        ctx.beginPath();
+        ctx.moveTo(x1,y1);
+        ctx.lineTo(x2,y2);
+        ctx.stroke();
+
+    }
+
+
+
+
+
+
+
+</script>
