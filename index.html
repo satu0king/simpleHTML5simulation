@@ -162,31 +162,31 @@
 
 
         // RANDOM
-        var ball1 = new Ball(1, 1);
-        ball1.type=ballType.FOLLOW;
-        var ball2 = new Ball(1, 2);
-        var ball3 = new Ball(2, 4, 2);
-        var ball4 = new Ball(0, 4, 1);
-        var ball5 = new Ball(width/(metre*5), height/(metre*3), 3);
-        ball5.type=ballType.FIXED;
-        ball1.connect(ball2,1,4);
-        ball2.connect(ball3);
-        ball2.connect(ball4);
-        ball2.connect(ball5);
+        // var ball1 = new Ball(1, 1);
+        // ball1.type=ballType.FOLLOW;
+        // var ball2 = new Ball(1, 2);
+        // var ball3 = new Ball(2, 4, 2);
+        // var ball4 = new Ball(0, 4, 1);
+        // var ball5 = new Ball(width/(metre*5), height/(metre*3), 3);
+        // ball5.type=ballType.FIXED;
+        // ball1.connect(ball2,1,4);
+        // ball2.connect(ball3);
+        // ball2.connect(ball4);
+        // ball2.connect(ball5);
 
         // LONG CHAIN
-        // e = 10
-        // l = 0.1
-        // var prev = new Ball();
-        // prev.type = ballType.FOLLOW;
-        // for (var i = 0; i < 50; i++) {
-        //     var temp = new Ball(3, 30, 0.05);
-        //     temp.connect(prev, l, e);
-        //     prev = temp;
-        // }
-        // prev.type = ballType.FIXED;
-        // prev.x = 3;
-        // prev.y = 30;
+        e = 10
+        l = 0.1
+        var prev = new Ball();
+        prev.type = ballType.FOLLOW;
+        for (var i = 0; i < 50; i++) {
+            var temp = new Ball(3, 30, 0.05);
+            temp.connect(prev, l, e);
+            prev = temp;
+        }
+        prev.type = ballType.FIXED;
+        prev.x = 3;
+        prev.y = 30;
 
 
     }
