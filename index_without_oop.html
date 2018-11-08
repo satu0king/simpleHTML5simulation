@@ -45,64 +45,52 @@
     }
 
     //declaration of variables
-    var x1=200,y1=200,x2=200,y2=200,x3=400,y3=400, s=100;
+    // Ball 1
+    var x1=200,y1=200;
+    // Ball 2
+    var x2=200,y2=200;
     var vx2=0,vy2=0;
-    var vx3=0,vy3=0;
-    mouseX=0;
-    mouseY=0;
+
+    var l=100;//length of the elastic string
+
+    //Mouse coordinates initializations
+    var mouseX=0;
+    var mouseY=0;
 
     window.addEventListener('mousemove', function(e) {
         mouseX = e.clientX;
         mouseY = e.clientY;
-
     });
+
+    //Loop fn
     setInterval(iterate,50);
+
     function iterate(){
         //Getting the coordinates of the mouse
-
         var x1=mouseX;
         var y1=mouseY;
 
         //Finding distance and angle between 2 points
-
         var d1=distance(x1,y1,x2,y2);
-        var d2=distance(x3,y3,x2,y2);
         var ang1=angle(x1,y1,x2,y2);
-        var ang2=angle(x3,y3,x2,y2);
 
         //If the rope is stretched
-
-        if(d1-s>0){
+        if(d1-l>0){
             //Resolving tension into vectors
-            vy2+=(d1-s)*Math.sin(ang1)*.007;
-            vx2+=(d1-s)*Math.cos(ang1)*.007;
-        }
-        if(d2-s>0){
-            //Resolving tension into vectors
-            vy2+=(d2-s)*Math.sin(ang2)*.007;
-            vx2+=(d2-s)*Math.cos(ang2)*.007;
-            vy3-=(d2-s)*Math.sin(ang2)*.007;
-            vx3-=(d2-s)*Math.cos(ang2)*.007;
+            vy2+=(d1-l)*Math.sin(ang1)*.007;
+            vx2+=(d1-l)*Math.cos(ang1)*.007;
         }
 
         //Gravitational force on y coordinate
-
-        vy2+=.53;
-        vy3+=.53;
+        vy2+=.98;
 
         //Now moving the body
-
         y2+=vy2;
         x2+=vx2;
-        y3+=vy3;
-        x3+=vx3;
 
-        //Friction reduces velocity by 1%
-
+        //Friction reduces velocity by 3%
         vy2*=.97;
         vx2*=.97;
-        vx3*=.97;
-        vx3*=.97;
 
         //Drawing begins here
         clearCanvas();
@@ -114,17 +102,10 @@
         ctx.beginPath();
         ctx.arc(x2,y2,25,0,2*Math.PI);
         ctx.stroke();
-        ctx.beginPath();
-        ctx.arc(x3,y3,25,0,2*Math.PI);
-        ctx.stroke();
 
         //draws a line between them
         ctx.beginPath();
         ctx.moveTo(x1,y1);
-        ctx.lineTo(x2,y2);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.moveTo(x3,y3);
         ctx.lineTo(x2,y2);
         ctx.stroke();
 
