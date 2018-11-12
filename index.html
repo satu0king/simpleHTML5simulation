@@ -165,13 +165,16 @@
             var angle = this.ball1.angle(this.ball2);
 
             if (d - this.length > 0) {
-                //Resolving tension into vectors
-                this.ball1.fy -= (d - this.length) * Math.sin(angle) * this.elasticity;
-                this.ball1.fx -= (d - this.length) * Math.cos(angle) * this.elasticity;
+
+                var force = (d - this.length)/this.length;
 
                 //Resolving tension into vectors
-                this.ball2.fy += (d - this.length) * Math.sin(angle) * this.elasticity;
-                this.ball2.fx += (d - this.length) * Math.cos(angle) * this.elasticity;
+                this.ball1.fy -= force * Math.sin(angle) * this.elasticity;
+                this.ball1.fx -= force * Math.cos(angle) * this.elasticity;
+
+                //Resolving tension into vectors
+                this.ball2.fy += force * Math.sin(angle) * this.elasticity;
+                this.ball2.fx += force * Math.cos(angle) * this.elasticity;
             }
         }
 
@@ -217,10 +220,11 @@
         // ball2.connect(ball5);
 
         // LONG CHAIN
-        // e = 10
+        // e = 1.5
         // l = 0.1
         // var prev = new Ball();
         // prev.type = ballType.FOLLOW;
+        //
         // for (var i = 0; i < 50; i++) {
         //     var temp = new Ball(3, 30, 0.05);
         //     temp.connect(prev, l, e);
