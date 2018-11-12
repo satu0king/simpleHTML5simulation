@@ -14,13 +14,16 @@
         document.getElementById("simulationArea").width=width;
         document.getElementById("simulationArea").height=height;
     }
+
     function clearCanvas(){
         ctx.clearRect(0,0,width,height);
     }
+
     //Distance is a function which calculates Distance between 2 points
     function distance(x1,y1,x2,y2){
         return Math.sqrt((x1-x2)*(x1-x2)+(y1-y2)*(y1-y2));
     }
+    
     //Angle is a function which calculates the angle between 2 points
     function angle(x1 ,y1,x2 ,y2){
         var ang;
