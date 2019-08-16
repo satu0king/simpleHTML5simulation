@@ -1,0 +1,356 @@
+<html>
+
+<body onload="setup()">
+    <canvas id="simulationArea" style="position: absolute; left: 0; top: 0; z-index: 0; width:100%;height:100%"></canvas>
+</body>
+
+</html>
+<script>
+    // CONSTANTS
+    const metre = 10; // 10px/metre
+    const gravity = 9.8;
+    const friction = 1.5;
+
+    // ObjectLists
+    var ballList = [];
+    var ropeList = [];
+
+    //Mouse coordinates initializations
+    var mouseX = 0;
+    var mouseY = 0;
+    var mouseZ = 0;
+
+    // ENUM for ball type
+    const ballType = {
+        NORMAL: 1,
+        FIXED: 2,
+        FOLLOW: 3
+    }
+
+    // Listeners
+    window.addEventListener('mousemove', function(e) {
+
+        // Sets the moyse coordinates
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    // Listeners
+    window.addEventListener('mousemove', function(e) {
+
+        // Sets the moyse coordinates
+        mouseX = e.clientX;
+        mouseY = e.clientY;
+    });
+
+    document.addEventListener("keydown", function(event) {
+  event.preventDefault();
+  const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
+  switch (key) { // change to event.key to key to use the above variable
+    case "ArrowUp":
+      // Up pressed
+      mouseZ+=100;
+      break;
+    case "ArrowDown":
+      // Down pressed
+      mouseZ-=100;
+      break;
+  }
+});
+
+
+    // Helper function to clear screen
+    function clearCanvas() {
+        ctx.clearRect(0, 0, width, height);
+    }
+
+
+    // Setup function, creates canvas correctly, initialized variables
+    function setup() {
+        ctx = document.getElementById("simulationArea").getContext("2d");
+        height = window.innerHeight;
+        width = window.innerWidth;
+
+        width_metre = width / metre; //Scaling to metres
+        height_metre = height / metre; //Scaling to metres
+
+        document.getElementById("simulationArea").width = width;
+        document.getElementById("simulationArea").height = height;
+
+        mouseX = width / 2;
+        mouseY = height / 2;
+
+        initialize();
+        setInterval(loop, T);
+    }
+
+    // Class Ball
+    class Ball {
+        constructor(x = width_metre / 2, y = height_metre / 2, z = 0, mass = 3.0, density = 1.0) {
+
+            // Position of ball
+            this.x = x;
+            this.y = y;
+            this.z = z;
+
+            // Velocity of ball
+            this.vx = 0;
+            this.vy = 0;
+            this.vz = 0;
+
+            // Force on ball
+            this.fx = 0;
+            this.fy = 0;
+            this.fz = 0;
+
+            // Ball properties
+            this.mass = mass;
+            this.type = ballType.NORMAL;
+            this.density = density;
+
+            // Adds ball to global ropeList
+            ballList.push(this);
+        }
+
+        // Reset all forces and apply gravitational force
+        resetForces() {
+            this.fx = 0;
+            this.fz = 0;
+            this.fy = gravity * this.mass;
+
+            let _x = mouseX/metre;
+            let _y = mouseY/metre;
+            let _z = mouseZ/metre;
+            var d = Math.sqrt((this.x - _x) * (this.x - _x) + (this.y - _y) * (this.y - _y) + (this.z - _z) * (this.z - _z));
+           
+            // console.log(force, d);
+
+            if (d < 300) {
+                // console.log(d);
+            }
+            else if(Math.random()*100 > 90) {
+                // console.log(d, this.x, this.y);
+            }
+
+                var xLength = (this.x - _x);
+                var yLength = (this.y - _y);
+                var zLength = (this.z - _z);
+                var force = 1000 * this.mass /(d*d+2);
+                // console.log(force, d);
+
+                //Resolving tension into vectors
+                this.fy += 1.0 * force * yLength / d;
+                this.fx += 1.0 * force * xLength / d;
+                this.fz += 1.0 * force * zLength / d;
+
+            // }
+        }
+
+        // moves the ball by time `t`. `t` is the amount of time passed since this function was called last
+        move(t) {
+
+            if (this.type == ballType.NORMAL) {
+                t /= 1000;
+
+                // using acceleration = force/mass and velocity = acceleration*time
+                this.vx += this.fx * t / this.mass;
+                this.vy += this.fy * t / this.mass;
+                this.vz += this.fz * t / this.mass;
+
+                // Using x = v*time
+                this.x += this.vx * t * metre;
+                this.y += this.vy * t * metre;
+                this.z += this.vz * t * metre;
+
+                // Applying friction
+                this.vy *= 1 - friction * t;
+                this.vx *= 1 - friction * t;
+                this.vz *= 1 - friction * t;
+
+            } else if (this.type == ballType.FOLLOW) {
+                this.x = mouseX / metre;
+                this.y = mouseY / metre;
+                this.Z = mouseZ / metre;
+            }
+
+        }
+
+        render(ctx) {
+
+            var x = metre * this.x;
+            var y = metre * this.y;
+            var volume = this.mass / this.density;
+            var radius = metre * Math.pow(3.0 * volume / (Math.PI * 4.0), 1 / 3.0);
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.stroke();
+        }
+
+        //Distance is a function which calculates Distance between 2 points
+        distance(other) {
+            return Math.sqrt((this.x - other.x) * (this.x - other.x) + (this.y - other.y) * (this.y - other.y) + (this.z - other.z) * (this.z - other.z));
+        }
+
+        //Angle is a function which calculates the angle between 2 points
+        angle(other) {
+            var x1 = this.x;
+            var y1 = this.y;
+            var x2 = other.x;
+            var y2 = other.y;
+
+            // Tan inverse
+            return Math.atan2(y1 - y2, x1 - x2);
+        }
+
+        connect(other, length = 1, elasticity = 2) {
+            return new Rope(this, other, length, elasticity);
+        }
+    }
+
+    // Class which connects two balls
+    class Rope {
+        constructor(ball1, ball2, length, elasticity) {
+            this.ball1 = ball1;
+            this.ball2 = ball2;
+            this.length = length;
+            this.elasticity = elasticity;
+            ropeList.push(this);
+        }
+
+        exertForces() {
+
+            var d = this.ball1.distance(this.ball2);
+            var angle = this.ball1.angle(this.ball2);
+
+            var d = this.ball1.distance(this.ball2);
+            var angle = this.ball1.angle(this.ball2);
+            var xLength = (this.ball1.x - this.ball2.x);
+            var yLength = (this.ball1.y - this.ball2.y);
+            var zLength = (this.ball1.z - this.ball2.z);
+
+            if (d - this.length > 0) {
+
+                var force = (d - this.length) * this.elasticity / this.length;
+
+                //Resolving tension into vectors
+                this.ball1.fy -= 1.0 * force * yLength / d;
+                this.ball1.fx -= 1.0 * force * xLength / d;
+                this.ball1.fz -= 1.0 * force * zLength / d;
+
+                //Resolving tension into vectors
+                this.ball2.fy += 1.0 * force * yLength / d;
+                this.ball2.fx += 1.0 * force * xLength / d;
+                this.ball2.fz += 1.0 * force * zLength / d;
+            }
+
+           
+        }
+
+        render(ctx) {
+
+            //draws a line between them
+            ctx.beginPath();
+            ctx.moveTo(this.ball1.x * metre, this.ball1.y * metre);
+            ctx.lineTo(this.ball2.x * metre, this.ball2.y * metre);
+            ctx.stroke();
+        }
+
+    }
+
+    function initialize() {
+
+        // BASIC
+        // var ball1 = new Ball();
+        // var ball2 = new Ball();
+        // ball1.connect(ball2);
+        // ball1.type = ballType.FOLLOW;
+
+        // SMALL CHAIN
+        // var ball1= new Ball();
+        // var ball2= new Ball();
+        // var ball3= new Ball();
+        // ball1.connect(ball2,1,4);
+        // ball3.connect(ball2,1,4);
+        // ball1.type=ballType.FOLLOW;
+
+
+        // RANDOM
+        // var ball1 = new Ball(1, 1);
+        // ball1.type=ballType.FOLLOW;
+        // var ball2 = new Ball(1, 2);
+        // var ball3 = new Ball(2, 4, 2);
+        // var ball4 = new Ball(0, 4, 1);
+        // var ball5 = new Ball(width/(metre*5), height/(metre*3), 3);
+        // ball5.type=ballType.FIXED;
+        // ball1.connect(ball2,1,4);
+        // ball2.connect(ball3);
+        // ball2.connect(ball4);
+        // ball2.connect(ball5);
+
+        // LONG CHAIN
+        e = 70
+        l = 2
+        // var prev = new Ball();
+        // prev.type = ballType.FOLLOW;
+
+        // for (var i = 0; i < 50; i++) {
+        //     var temp = new Ball(3, 30, 0, 0.05);
+        //     temp.connect(prev, l, e);
+        //     prev = temp;
+        // }
+        // prev.type = ballType.FIXED;
+        // prev.x = 3;
+        // prev.y = 30;
+        
+        var n = 30;
+        var cloth = [];
+        var r = 1.2
+        for(var i=0; i<n; i++) {
+            cloth[i] = [];
+            for(var j=0; j<n; j++) {
+                cloth[i][j] = new Ball(j*l*r, i*l*r, 0, 0.02);
+            }
+        }
+
+        cloth[0][0].type = ballType.FIXED;
+        cloth[0][n-1].type = ballType.FIXED;
+        cloth[0][n/2].type = ballType.FIXED;
+
+        for(var i=0; i<n; i++) {
+            for(var j=0; j<n; j++) {
+                if(i+1<n) cloth[i][j].connect(cloth[i+1][j], l, e);
+                if(j+1<n) cloth[i][j].connect(cloth[i][j+1], l, e);
+            }
+        }
+
+    }
+
+    // Time Period (in ms)
+    const T = 5;
+
+    //Loop fn
+    function loop() {
+
+        // Clear forces
+        for (var i = 0; i < ballList.length; i++)
+            ballList[i].resetForces();
+
+        // Apply all forces
+        for (var i = 0; i < ropeList.length; i++)
+            ropeList[i].exertForces();
+
+        // Move by time T
+        for (var i = 0; i < ballList.length; i++)
+            ballList[i].move(T);
+
+        // Drawing begins here
+        clearCanvas();
+        for (var i = 0; i < ropeList.length; i++)
+            ropeList[i].render(ctx);
+
+        // Render now
+        for (var i = 0; i < ballList.length; i++)
+            ballList[i].render(ctx);
+
+    }
+</script>
