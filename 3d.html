@@ -18,7 +18,12 @@
     //Mouse coordinates initializations
     var mouseX = 0;
     var mouseY = 0;
+    var mouseDownX = 0;
+    var mouseDownY = 0;
     var mouseZ = 0;
+    var mouseDown = false;
+
+    
 
     // ENUM for ball type
     const ballType = {
@@ -26,6 +31,9 @@
         FIXED: 2,
         FOLLOW: 3
     }
+
+    window.addEventListener("mousedown", function(e){mouseDownX = mouseX; mouseDownY = mouseY; mouseDown = true});
+    window.addEventListener("mouseup", function(e){mouseDown = false});
 
     // Listeners
     window.addEventListener('mousemove', function(e) {
@@ -44,19 +52,49 @@
     });
 
     document.addEventListener("keydown", function(event) {
-  event.preventDefault();
-  const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
-  switch (key) { // change to event.key to key to use the above variable
-    case "ArrowUp":
-      // Up pressed
-      mouseZ+=100;
-      break;
-    case "ArrowDown":
-      // Down pressed
-      mouseZ-=100;
-      break;
-  }
-});
+    // event.preventDefault();
+    const key = event.key; // "ArrowRight", "ArrowLeft", "ArrowUp", or "ArrowDown"
+    switch (key) { // change to event.key to key to use the above variable
+        case "ArrowUp":
+        // Up pressed
+        mouseZ+=100;
+        break;
+        case "ArrowDown":
+        // Down pressed
+        mouseZ-=100;
+        break;
+    }
+    });
+
+    function orientation(p, q, r) 
+    { 
+        // See https://www.geeksforgeeks.org/orientation-3-ordered-points/ 
+        // for details of below formula. 
+        let val = (q.y - p.y) * (r.x - q.x) - 
+                (q.x - p.x) * (r.y - q.y); 
+    
+        if (val == 0) return 0;  // colinear 
+    
+        return (val > 0)? 1: 2; // clock or counterclock wise 
+    } 
+    
+    // The main function that returns true if line segment 'p1q1' 
+    // and 'p2q2' intersect. 
+    function doIntersect(p1, q1, p2, q2) 
+    { 
+        // Find the four orientations needed for general and 
+        // special cases 
+        let o1 = orientation(p1, q1, p2); 
+        let o2 = orientation(p1, q1, q2); 
+        let o3 = orientation(p2, q2, p1); 
+        let o4 = orientation(p2, q2, q1); 
+    
+        // General case 
+        if (o1 != o2 && o3 != o4) 
+            return true; 
+    
+        return false; // Doesn't fall in any of the above cases 
+    }
 
 
     // Helper function to clear screen
@@ -214,10 +252,20 @@
             this.ball2 = ball2;
             this.length = length;
             this.elasticity = elasticity;
+            this.present = true;
             ropeList.push(this);
         }
 
         exertForces() {
+
+           
+
+            if(!this.present)return;
+
+            if(mouseDown && doIntersect(this.ball1, this.ball2, {x:mouseDownX/metre, y:mouseDownY/metre}, {x:mouseX/metre, y:mouseY/metre})) {
+                this.present = false;
+                return;
+            }
 
             var d = this.ball1.distance(this.ball2);
             var angle = this.ball1.angle(this.ball2);
@@ -247,7 +295,7 @@
         }
 
         render(ctx) {
-
+            if(!this.present)return;
             //draws a line between them
             ctx.beginPath();
             ctx.moveTo(this.ball1.x * metre, this.ball1.y * metre);
@@ -305,12 +353,17 @@
         var n = 30;
         var cloth = [];
         var r = 1.2
+        var xOffset = Math.round((width_metre - n*r*l)/2);
+        var yOffset = (height_metre - n*r*l)/2;
         for(var i=0; i<n; i++) {
             cloth[i] = [];
             for(var j=0; j<n; j++) {
-                cloth[i][j] = new Ball(j*l*r, i*l*r, 0, 0.02);
+                cloth[i][j] = new Ball(j*l*r + xOffset, i*l*r + yOffset, 0, 0.02);
             }
         }
+
+        // for(let i = 0; i < n; i++)
+        // cloth[0][i].type = ballType.FIXED;
 
         cloth[0][0].type = ballType.FIXED;
         cloth[0][n-1].type = ballType.FIXED;
