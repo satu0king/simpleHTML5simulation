@@ -23,6 +23,8 @@
     var mouseZ = 0;
     var mouseDown = false;
 
+    var globalCounter = 0;
+
     
 
     // ENUM for ball type
@@ -38,7 +40,11 @@
     // Listeners
     window.addEventListener('mousemove', function(e) {
 
-        // Sets the moyse coordinates
+        // Sets the mouse coordinates
+        if(mouseDown && (Math.abs(mouseDownX - mouseX) + Math.abs(mouseDownY - mouseY) > 10)) {
+            mouseDownX  = 0.9 * mouseX + mouseDownX * 0.1;
+            mouseDownY  = 0.9 * mouseY + mouseDownY * 0.1;
+        }
         mouseX = e.clientX;
         mouseY = e.clientY;
     });
