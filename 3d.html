@@ -354,7 +354,7 @@
         var cloth = [];
         var r = 1.2
         var xOffset = Math.round((width_metre - n*r*l)/2);
-        var yOffset = (height_metre - n*r*l)/2;
+        var yOffset =  Math.round((height_metre - n*r*l)/2);
         for(var i=0; i<n; i++) {
             cloth[i] = [];
             for(var j=0; j<n; j++) {
